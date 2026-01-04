@@ -1,68 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./src/config/dbConnect');
+require('dotenv').config();
+const fetch = require('node-fetch');
 
-router.get('/fssai-chatbot', async (req, res) => {
+// Gemini API endpoint and key from .env
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+// System prompt for Gemini context
+const SYSTEM_PROMPT = "Answer only questions related to food hygiene inspections, restaurant hygiene, inspection reports, and inspectors. If asked anything else, politely refuse.";
+
+router.post('/food-chatbot', async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).json({ response: 'No prompt provided.' });
   try {
-    // Fetch top 5 approved restaurant details
-    const [restaurants] = await db.query(`
-      SELECT id, name, zone, region, hygiene_score, license_number, last_inspection_date, contact_person, phone
-      FROM restaurants
-      WHERE status = 'approved'
-      LIMIT 5
-    `);
-
-    // Format restaurant info into HTML links
-    const restaurantSection = restaurants.map(r =>
-      `🏢 <strong>${r.name}</strong> (Zone: ${r.zone}, Region: ${r.region}, Hygiene Score: ${r.hygiene_score}, License No: ${r.license_number}, Last Inspection: ${r.last_inspection_date}, Contact: ${r.contact_person}, 📞 ${r.phone})`
-    ).join('<br><br>');
-
-
-
-    const fssaiIntro = `
-🤖 <strong>Hello!</strong> I am your official assistant for the <strong>FSSAI Inspector Hub</strong> platform. I specialize only in food safety, hygiene inspections, and FSSAI licensing.
-
-🔒 <strong>Note:</strong> I respond only to food-related queries.
-
-🍽️ <strong>FSSAI Help Topics:</strong><br>
-- What is FSSAI and why is licensing important?<br>
-- How hygiene scores are calculated.<br>
-- Viewing inspection reports.<br>
-- How to file complaints.<br>
-- Approved restaurants near you.
-
-
-
-
-📊 <strong>Hygiene Score Meaning:</strong><br>
-🟢 4.1–5.0: Excellent<br>
-🟡 3.0–4.0: Good<br>
-🟠 2.0–2.9: Average<br>
-🔴 Below 2.0: Poor
-
-🧾 <strong>FSSAI License Requirement:</strong><br>
-All listed restaurants are licensed by FSSAI.
-
-
-
-
-
-🛠️ <strong>How to File a Complaint:</strong><br>
-1. Select a restaurant from below.<br>
-2. Click on <strong>"File Complaint"</strong>.<br>
-3. Fill the form and submit.
-
-📍 <strong>Top Approved Restaurants:</strong><br>
-${restaurantSection} 
-
-❗ <strong>Reminder:</strong> I answer only questions about food safety, inspections, and FSSAI platform features.
-    `;
-
-    res.json({ prompt: fssaiIntro });
-
+    // Use only the user prompt and system prompt in a single part for compatibility
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          { parts: [{ text: `${SYSTEM_PROMPT}\n${prompt}` }] }
+        ]
+      })
+    });
+    const data = await response.json();
+    console.log('Gemini API response:', data); // Log full response for debugging
+    const botReply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not get a response.';
+    res.json({ response: botReply });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to generate chatbot prompt' });
+    res.status(500).json({ response: 'Error connecting to Gemini API.' });
   }
 });
 

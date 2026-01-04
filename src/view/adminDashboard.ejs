@@ -95,12 +95,33 @@
   </div>
 </div>
 
+<!-- Sticky Chatbot Button & Popup -->
+<div id="food-chatbot-btn" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
+  <button style="background:transparent;border:none;padding:0;cursor:pointer;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+    <img src="/chatbot/images/chatbot.png" alt="Chatbot" style="width:64px;height:64px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);" />
+  </button>
+</div>
+<div id="food-chatbot-popup" style="display:none;position:fixed;bottom:80px;right:32px;width:350px;max-width:90vw;height:480px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:10000;overflow:hidden;flex-direction:column;">
+  <div style="background:#2979ff;color:#fff;padding:12px 16px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;">
+    Food Hygiene Inspection Chatbot
+    <span id="close-chatbot" style="cursor:pointer;font-size:20px;">&times;</span>
+  </div>
+  <div id="chatbot-messages" style="flex:1;padding:16px;overflow-y:auto;font-size:15px;"></div>
+  <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;">
+    <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #ccc;" />
+    <button id="send-chatbot" style="background:#2979ff;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Send</button>
+  </div>
+</div>
+<!-- End Chatbot -->
+
 <script src="https://unpkg.com/lucide@latest"></script>
 <script>
   lucide.createIcons();
 </script>
 <!-- Add this at the bottom of your adminDashboard.ejs -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/js/home1.js"></script>
 <script>
   // Show success message if redirected from login
   const urlParams = new URLSearchParams(window.location.search);
