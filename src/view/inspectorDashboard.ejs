@@ -7,6 +7,124 @@
   <link rel="stylesheet" href="/css/inspectorDashboard.css" />
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+<style>
+  /* ✅ Chatbot Button */
+  #open-chatbot-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 40px rgba(20, 184, 166, 0.4);
+    transition: all 0.3s ease;
+    animation: chatbotPulse 2s infinite;
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 9999;
+  }
+
+  @keyframes chatbotPulse {
+    0%, 100% { box-shadow: 0 10px 40px rgba(20, 184, 166, 0.4); }
+    50% { box-shadow: 0 10px 60px rgba(20, 184, 166, 0.6); }
+  }
+
+  #open-chatbot-btn:hover {
+    transform: scale(1.1);
+  }
+
+  #open-chatbot-btn img {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* ✅ Popup Style */
+  #food-chatbot-popup {
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.1);
+    position: fixed;
+    bottom: 80px;
+    right: 32px;
+    width: 350px;
+    max-width: 90vw;
+    height: 480px;
+    max-height: 80vh;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    z-index: 10000;
+    overflow: hidden;
+    flex-direction: column;
+    display: none;
+  }
+
+  .chatbot-header {
+    padding: 20px 24px;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+    color: white;
+  }
+
+  .chatbot-close {
+    cursor: pointer;
+    font-size: 24px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  .chatbot-close:hover {
+    opacity: 1;
+  }
+
+  .chatbot-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 15px;
+    background: #1e293b;
+    color: #f8fafc;
+  }
+
+  .chatbot-input-row {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    gap: 12px;
+  }
+
+  #chatbot-input {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    background: #0f172a;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #f8fafc;
+    outline: none;
+  }
+
+  #send-chatbot {
+    color: #fff;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  }
+
+  #send-chatbot:hover {
+    opacity: 0.9;
+  }
+</style>
+</head>
 <body>
 
 <%- include('partials/header2') %>
@@ -137,22 +255,20 @@
 </div>
 
 <!-- Sticky Chatbot Button & Popup -->
-<div id="food-chatbot-btn" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
-  <button style="background:transparent;border:none;padding:0;cursor:pointer;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-    <img src="/chatbot/images/chatbot.png" alt="Chatbot" style="width:64px;height:64px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);" />
-  </button>
-</div>
-<div id="food-chatbot-popup" style="display:none;position:fixed;bottom:80px;right:32px;width:350px;max-width:90vw;height:480px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:10000;overflow:hidden;flex-direction:column;">
-  <div style="background:#2979ff;color:#fff;padding:12px 16px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;">
+<!-- <button id="open-chatbot-btn">
+  <img src="/chatbot/images/chatbot.png" alt="Chatbot" />
+</button>
+<div id="food-chatbot-popup">
+  <div class="chatbot-header">
     Food Hygiene Inspection Chatbot
-    <span id="close-chatbot" style="cursor:pointer;font-size:20px;">&times;</span>
+    <span class="chatbot-close" id="close-chatbot">&times;</span>
   </div>
-  <div id="chatbot-messages" style="flex:1;padding:16px;overflow-y:auto;font-size:15px;"></div>
-  <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;">
-    <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #ccc;" />
-    <button id="send-chatbot" style="background:#2979ff;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Send</button>
+  <div class="chatbot-messages" id="chatbot-messages"></div>
+  <div class="chatbot-input-row">
+    <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." />
+    <button id="send-chatbot">Send</button>
   </div>
-</div>
+</div> -->
 <!-- End Chatbot -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="/js/home1.js"></script>
@@ -180,4 +296,5 @@
   }
 </script>
 </body>
+<%- include('partials/chatbot') %>
 </html>

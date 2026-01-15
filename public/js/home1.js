@@ -3,7 +3,7 @@
 
 // Chatbot popup logic
 document.addEventListener('DOMContentLoaded', function() {
-    const chatbotBtn = document.getElementById('food-chatbot-btn');
+    const chatbotBtn = document.getElementById('open-chatbot-btn');
     const chatbotPopup = document.getElementById('food-chatbot-popup');
     const closeChatbot = document.getElementById('close-chatbot');
     const sendBtn = document.getElementById('send-chatbot');

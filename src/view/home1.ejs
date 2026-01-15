@@ -1,101 +1,852 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Food Hygiene Inspection Hub</title>
-  <link rel="stylesheet" href="/css/home1.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="/js/home1.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #14b8a6;
+      --accent-light: #5eead4;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #0c4a6e 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+   
+
+
+    /* Animated Background */
+    .bg-particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { left: 20%; animation-delay: 2s; }
+    .particle:nth-child(3) { left: 30%; animation-delay: 4s; }
+    .particle:nth-child(4) { left: 40%; animation-delay: 6s; }
+    .particle:nth-child(5) { left: 50%; animation-delay: 8s; }
+    .particle:nth-child(6) { left: 60%; animation-delay: 10s; }
+    .particle:nth-child(7) { left: 70%; animation-delay: 12s; }
+    .particle:nth-child(8) { left: 80%; animation-delay: 14s; }
+    .particle:nth-child(9) { left: 90%; animation-delay: 16s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 0.3; }
+      50% { transform: translateY(50vh) scale(1); opacity: 0.5; }
+      90% { opacity: 0.3; }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 16px 0;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .nav-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=80') center/cover no-repeat;
+      opacity: 0.1;
+      z-index: -1;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 24px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #0d9488 100%);
+      color: white;
+      box-shadow: 0 10px 40px rgba(20, 184, 166, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 50px rgba(20, 184, 166, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 2px solid var(--glass-border);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 60px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 24px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Login Section */
+    .login-section {
+      padding: 100px 24px;
+      position: relative;
+    }
+
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .section-subheading {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 60px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .login-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    
+
+    .card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 40px 32px;
+      backdrop-filter: blur(20px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      border-color: var(--accent);
+      box-shadow: 0 25px 50px rgba(20, 184, 166, 0.2);
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .card-icon svg {
+      width: 32px;
+      height: 32px;
+      color: white;
+    }
+
+    .card h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 100px 24px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      margin-bottom: 24px;
+    }
+
+    .about-text p {
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+
+    .features-list {
+      list-style: none;
+    }
+
+    .features-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      color: var(--text-muted);
+    }
+
+    .features-list li svg {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* .about-image {
+      position: relative;
+    }
+
+    .about-image img {
+      width: 100%;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    } */
+
+    .about-image {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;              /* ✅ IMPORTANT: keeps photo inside box */
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.about-image img {
+  width: 100%;
+  height: 100%;                  /* ✅ fill container */
+  display: block;                /* ✅ removes extra spacing */
+  object-fit: cover;             /* ✅ crop image cleanly */
+  border-radius: 24px;           /* ✅ match container radius */
+}
+
+    /* .about-image::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100%;
+      height: 100%;
+      border: 2px solid var(--accent);
+      border-radius: 24px;
+      z-index: -1;
+    } */
+
+    .about-image::before {
+  content: '';
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--accent);
+  border-radius: 28px;           /* ✅ slightly bigger radius looks nicer */
+  z-index: -1;
+}
+
+
+    /* Footer */
+    .footer {
+      padding: 60px 24px 30px;
+      background: rgba(0, 0, 0, 0.3);
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .footer-brand p {
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer-links h4 {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .login-cards .card.center {
+  grid-column: 1 / -1;     /* takes full row */
+  justify-self: center;    /* centers card */
+  max-width: 350px;        /* optional: better width */
+}
+
+    .footer-links a {
+      display: block;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Chatbot */
+    #food-chatbot-btn button {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, #0d9488 100%);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 40px rgba(20, 184, 166, 0.4);
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 10px 40px rgba(20, 184, 166, 0.4); }
+      50% { box-shadow: 0 10px 60px rgba(20, 184, 166, 0.6); }
+    }
+
+    #food-chatbot-btn button:hover {
+      transform: scale(1.1);
+    }
+
+    #food-chatbot-btn img {
+      width: 40px;
+      height: 40px;
+    }
+
+    #food-chatbot-popup {
+      background: var(--primary) !important;
+      border: 1px solid var(--glass-border) !important;
+    }
+
+    #food-chatbot-popup > div:first-child {
+      background: linear-gradient(135deg, var(--accent) 0%, #0d9488 100%) !important;
+    }
+
+    #chatbot-messages {
+      background: var(--primary-light);
+    }
+
+    #chatbot-input {
+      background: var(--primary);
+      border: 1px solid var(--glass-border);
+      color: var(--text);
+    }
+
+    #send-chatbot {
+      background: linear-gradient(135deg, var(--accent) 0%, #0d9488 100%);
+    }
+
+    /* Scroll animations */
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s ease-out;
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(15, 23, 42, 0.95);
+        flex-direction: column;
+        padding: 24px;
+        gap: 16px;
+        border-bottom: 1px solid var(--glass-border);
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .about-content {
+        grid-template-columns: 1fr;
+      }
+
+      .about-image {
+        order: -1;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .login-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  
 </head>
 
 <body>
+  <!-- Animated Background Particles -->
+  <div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
   <!-- Sticky Chatbot Button & Popup -->
   <div id="food-chatbot-btn" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
-    <button style="background:transparent;border:none;padding:0;cursor:pointer;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-      <img src="/chatbot/images/chatbot.png" alt="Chatbot" style="width:64px;height:64px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);" />
+    <button>
+      <img src="/chatbot/images/chatbot.png" alt="Chatbot" />
     </button>
   </div>
-  <div id="food-chatbot-popup" style="display:none;position:fixed;bottom:80px;right:32px;width:350px;max-width:90vw;height:480px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:10000;overflow:hidden;flex-direction:column;">
-    <div style="background:#2979ff;color:#fff;padding:12px 16px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;">
-      Food Hygiene Inspection Chatbot
-      <span id="close-chatbot" style="cursor:pointer;font-size:20px;">&times;</span>
+  <div id="food-chatbot-popup" style="display:none;position:fixed;bottom:120px;right:32px;width:380px;max-width:90vw;height:500px;max-height:80vh;border-radius:24px;box-shadow:0 25px 50px rgba(0,0,0,0.3);z-index:10000;overflow:hidden;flex-direction:column;">
+    <div style="padding:20px 24px;font-weight:600;display:flex;justify-content:space-between;align-items:center;font-size:1.1rem;">
+      <span>🍽️ Food Hygiene Assistant</span>
+      <span id="close-chatbot" style="cursor:pointer;font-size:24px;opacity:0.7;transition:opacity 0.3s;">&times;</span>
     </div>
-    <div id="chatbot-messages" style="flex:1;padding:16px;overflow-y:auto;font-size:15px;"></div>
-    <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;">
-      <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #ccc;" />
-      <button id="send-chatbot" style="background:#2979ff;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Send</button>
-    </div>
-  </div>
-
-<!-- Navigation -->
-<nav class="navbar">
-  <div class="container nav-wrapper">
-    <div class="logo">Food Hygiene Inspection Hub</div>
-    <div class="nav-links">
-      <a href="#login">Login</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
+    <div id="chatbot-messages" style="flex:1;padding:20px;overflow-y:auto;font-size:15px;"></div>
+    <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:12px;">
+      <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." style="flex:1;padding:14px 18px;border-radius:50px;font-size:0.95rem;" />
+      <button id="send-chatbot" style="color:#fff;padding:14px 24px;border:none;border-radius:50px;cursor:pointer;font-weight:600;">Send</button>
     </div>
   </div>
-</nav>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="container center">
-    <h1>Ensuring Safer Dining Experiences</h1>
-    <p>Real-time inspections, public transparency, and hygiene-driven accountability for restaurants.</p>
-    <a href="#login" class="btn btn-primary">Explore Login Options</a>
-  </div>
-</section>
-
-<!-- Login Portals -->
-<section id="login" class="login-section">
-  <div class="container">
-    <h2 class="section-heading">Login Portals</h2>
-    <div class="login-cards">
-      <div class="card">
-        <h3>General Users</h3>
-        <p>View hygiene reports & ratings of registered restaurants in your area.</p>
-        <a href="/userLogin" class="btn btn-outline">User Login</a>
-      </div>
-      <div class="card">
-        <h3>Inspectors</h3>
-        <p>Submit inspection reports, upload evidence & assign scores.</p>
-        <a href="/inspectorLogin" class="btn btn-outline">Inspector Login</a>
-      </div>
-      <div class="card">
-        <h3>Admin</h3>
-        <p>Manage restaurants, inspectors, reports & approval workflows.</p>
-        <a href="/adminLogin" class="btn btn-outline">Admin Login</a>
-      </div>
-      <div class="card">
-        <h3>Super Admin</h3>
-        <p>Manage system admins, platform settings, and global configurations.</p>
-        <a href="/superadmin/login" class="btn btn-outline">Super Admin Login</a>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container nav-wrapper">
+      <div class="logo">🍽️ Food Hygiene Hub</div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <i data-lucide="menu" style="width:24px;height:24px;"></i>
+      </button>
+      <div class="nav-links" id="navLinks">
+        <a href="#login">Login</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
       </div>
     </div>
-  </div>
-</section>
+  </nav>
 
-<!-- About -->
-<section id="about" class="about-section">
-  <div class="container center">
-    <h2 class="section-heading">About the Platform</h2>
-    <p>This platform helps uphold public health by providing a transparent and tech-enabled system for food hygiene inspection, reporting, and accountability. It is built under the direction of FSSAI regulations to assist regulatory bodies, restaurants, and the public alike.</p>
-  </div>
-</section>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Ensuring <span>Safer Dining</span> Experiences</h1>
+      <p>Real-time inspections, public transparency, and hygiene-driven accountability for restaurants. Powered by FSSAI regulations for a healthier tomorrow.</p>
+      <a href="#login" class="btn btn-primary">
+        <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
+        Explore Login Options
+      </a>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-number">10K+</div>
+          <div class="stat-label">Restaurants Inspected</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Certified Inspectors</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">99%</div>
+          <div class="stat-label">Compliance Rate</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- Footer -->
-<footer class="footer">
-  <div class="container">
-    <p>&copy; <%= new Date().getFullYear() %> Food Hygiene Inspection Hub. All Rights Reserved.</p>
-  </div>
-</footer>
+  <!-- Login Portals -->
+  <section id="login" class="login-section">
+    <div class="container">
+      <h2 class="section-heading">Access Your Portal</h2>
+      <p class="section-subheading">Choose your role to access the platform. Each portal is designed for specific user needs.</p>
+      <div class="login-cards">
+        <div class="card animate-on-scroll">
+          <div class="card-icon">
+            <i data-lucide="users"></i>
+          </div>
+          <h3>General Users</h3>
+          <p>View hygiene reports & ratings of registered restaurants in your area. Make informed dining choices.</p>
+          <a href="/userLogin" class="btn btn-outline">User Login</a>
+        </div>
+        <div class="card animate-on-scroll">
+          <div class="card-icon">
+            <i data-lucide="clipboard-check"></i>
+          </div>
+          <h3>Inspectors</h3>
+          <p>Submit inspection reports, upload evidence & assign scores. Ensure food safety standards.</p>
+          <a href="/inspectorLogin" class="btn btn-outline">Inspector Login</a>
+        </div>
+        <div class="card animate-on-scroll">
+          <div class="card-icon">
+            <i data-lucide="settings"></i>
+          </div>
+          <h3>Admin</h3>
+          <p>Manage restaurants, inspectors, reports & approval workflows. Oversee operations.</p>
+          <a href="/adminLogin" class="btn btn-outline">Admin Login</a>
+        </div>
+        <div class="card animate-on-scroll center">
+          <div class="card-icon">
+            <i data-lucide="shield"></i>
+          </div>
+          <h3>Super Admin</h3>
+          <p>Manage system admins, platform settings, and global configurations. Full control.</p>
+          <a href="/superadmin/login" class="btn btn-outline">Super Admin Login</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<script>
-  lucide.createIcons();
-</script>
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text animate-on-scroll">
+          <h2>About the Platform</h2>
+          <p>This platform helps uphold public health by providing a transparent and tech-enabled system for food hygiene inspection, reporting, and accountability.</p>
+          <p>Built under the direction of FSSAI regulations to assist regulatory bodies, restaurants, and the public alike.</p>
+          <ul class="features-list">
+            <li><i data-lucide="check-circle" style="width:20px;height:20px;"></i> Real-time inspection updates</li>
+            <li><i data-lucide="check-circle" style="width:20px;height:20px;"></i> Transparent rating system</li>
+            <li><i data-lucide="check-circle" style="width:20px;height:20px;"></i> FSSAI compliant processes</li>
+            <li><i data-lucide="check-circle" style="width:20px;height:20px;"></i> Mobile-friendly interface</li>
+            <li><i data-lucide="check-circle" style="width:20px;height:20px;"></i> Secure data handling</li>
+          </ul>
+        </div>
+        <div class="about-image animate-on-scroll">
+          <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80" alt="Food Safety Inspection" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>🍽️ Food Hygiene Hub</h3>
+          <p>Ensuring safer dining experiences through transparent inspections and accountability. Your health is our priority.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <a href="#login">Login Portals</a>
+          <a href="#about">About Us</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">FSSAI Guidelines</a>
+        </div>
+        <div class="footer-links">
+          <h4>Contact</h4>
+          <a href="mailto:support@foodhygienehub.com">support@foodhygienehub.com</a>
+          <a href="tel:+911234567890">+91 123 456 7890</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <%= new Date().getFullYear() %> Food Hygiene Inspection Hub. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      document.getElementById('navLinks').classList.toggle('active');
+    }
+
+    // Chatbot toggle
+    document.querySelector('#food-chatbot-btn button').addEventListener('click', function() {
+      document.getElementById('food-chatbot-popup').style.display = 'flex';
+    });
+    document.getElementById('close-chatbot').addEventListener('click', function() {
+      document.getElementById('food-chatbot-popup').style.display = 'none';
+    });
+
+    // Scroll animations
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 50) {
+        navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+      } else {
+        navbar.style.background = 'rgba(15, 23, 42, 0.8)';
+      }
+    });
+  </script>
 </body>
+<%- include('partials/chatbot') %>
 </html>

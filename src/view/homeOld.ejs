@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Hygiene Inspection Hub</title>
+  <link rel="stylesheet" href="/css/home1.css" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/js/home1.js"></script>
+</head>
+
+<body>
+  <!-- Sticky Chatbot Button & Popup -->
+  <div id="food-chatbot-btn" style="position:fixed;bottom:32px;right:32px;z-index:9999;">
+    <button style="background:transparent;border:none;padding:0;cursor:pointer;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+      <img src="/chatbot/images/chatbot.png" alt="Chatbot" style="width:64px;height:64px;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.15);" />
+    </button>
+  </div>
+  <div id="food-chatbot-popup" style="display:none;position:fixed;bottom:80px;right:32px;width:350px;max-width:90vw;height:480px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);z-index:10000;overflow:hidden;flex-direction:column;">
+    <div style="background:#2979ff;color:#fff;padding:12px 16px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;">
+      Food Hygiene Inspection Chatbot
+      <span id="close-chatbot" style="cursor:pointer;font-size:20px;">&times;</span>
+    </div>
+    <div id="chatbot-messages" style="flex:1;padding:16px;overflow-y:auto;font-size:15px;"></div>
+    <div style="padding:12px 16px;border-top:1px solid #eee;display:flex;gap:8px;">
+      <input id="chatbot-input" type="text" placeholder="Ask about food inspections..." style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #ccc;" />
+      <button id="send-chatbot" style="background:#2979ff;color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Send</button>
+    </div>
+  </div>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="container nav-wrapper">
+    <div class="logo">Food Hygiene Inspection Hub</div>
+    <div class="nav-links">
+      <a href="#login">Login</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container center">
+    <h1>Ensuring Safer Dining Experiences</h1>
+    <p>Real-time inspections, public transparency, and hygiene-driven accountability for restaurants.</p>
+    <a href="#login" class="btn btn-primary">Explore Login Options</a>
+  </div>
+</section>
+
+<!-- Login Portals -->
+<section id="login" class="login-section">
+  <div class="container">
+    <h2 class="section-heading">Login Portals</h2>
+    <div class="login-cards">
+      <div class="card">
+        <h3>General Users</h3>
+        <p>View hygiene reports & ratings of registered restaurants in your area.</p>
+        <a href="/userLogin" class="btn btn-outline">User Login</a>
+      </div>
+      <div class="card">
+        <h3>Inspectors</h3>
+        <p>Submit inspection reports, upload evidence & assign scores.</p>
+        <a href="/inspectorLogin" class="btn btn-outline">Inspector Login</a>
+      </div>
+      <div class="card">
+        <h3>Admin</h3>
+        <p>Manage restaurants, inspectors, reports & approval workflows.</p>
+        <a href="/adminLogin" class="btn btn-outline">Admin Login</a>
+      </div>
+      <div class="card">
+        <h3>Super Admin</h3>
+        <p>Manage system admins, platform settings, and global configurations.</p>
+        <a href="/superadmin/login" class="btn btn-outline">Super Admin Login</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about" class="about-section">
+  <div class="container center">
+    <h2 class="section-heading">About the Platform</h2>
+    <p>This platform helps uphold public health by providing a transparent and tech-enabled system for food hygiene inspection, reporting, and accountability. It is built under the direction of FSSAI regulations to assist regulatory bodies, restaurants, and the public alike.</p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; <%= new Date().getFullYear() %> Food Hygiene Inspection Hub. All Rights Reserved.</p>
+  </div>
+</footer>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>
