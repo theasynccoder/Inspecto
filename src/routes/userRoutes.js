@@ -5,6 +5,7 @@ const upload = require('../config/multer');
 const fs = require('fs');
 
 const { checklistSchema, sectionLabels } = require('../data/inspectionCategories');
+const SentimentService = require('../services/sentimentService');
 
 router.get('/userLogin',(req,res)=>{
     res.render('userViews/userLogin');
@@ -241,18 +242,36 @@ router.post('/user/complaint/:id', upload.array('images', 5), async (req, res) =
 
     const imagePaths = req.files.map(file => file.filename); // store filenames only
 
-    await db.query(
+    // Analyze sentiment
+    const sentimentService = new SentimentService();
+    const analysis = await sentimentService.analyzeComplaint(description);
+
+    // Insert complaint with sentiment data
+    const [result] = await db.query(
       `INSERT INTO complaints 
-      (user_id, restaurant_id, subject, message, is_anonymous, images) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
+      (user_id, restaurant_id, subject, message, is_anonymous, images, 
+       sentiment, sentiment_score, urgency, ai_analysis, analyzed_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
       [
         userId,
         restaurantId,
         subject,
-        description,                 // ✅ saved as `message` in table
-        anonymous ? 1 : 0,          // ✅ matches `is_anonymous`
-        JSON.stringify(imagePaths)  // ✅ saves array as string
+        description,
+        anonymous ? 1 : 0,
+        JSON.stringify(imagePaths),
+        analysis.sentiment,
+        analysis.sentiment_score,
+        analysis.urgency,
+        JSON.stringify(analysis)
       ]
+    );
+
+    // Log sentiment analysis
+    await db.query(
+      `INSERT INTO sentiment_analysis_log 
+      (complaint_id, sentiment, urgency, confidence_score, analysis_method)
+      VALUES (?, ?, ?, ?, 'groq-ai')`,
+      [result.insertId, analysis.sentiment, analysis.urgency, analysis.sentiment_score]
     );
 
     res.redirect('/user/complaints');

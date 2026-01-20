@@ -56,6 +56,38 @@
     </div>
   </div>
 
+  <!-- AI Sentiment Analysis Stats -->
+  <% if (stats.totalComplaints > 0) { %>
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; border-radius: 12px; color: white; margin: 24px 0; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+    <div style="display: flex; align-items: center; margin-bottom: 16px;">
+      <i data-lucide="brain" style="width: 32px; height: 32px; margin-right: 12px;"></i>
+      <h3 style="margin: 0; font-size: 20px;">AI-Powered Sentiment Analysis</h3>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px;">
+      <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+        <div style="font-size: 28px; font-weight: bold;"><%= stats.totalComplaints %></div>
+        <div style="font-size: 13px; opacity: 0.9;">Total Complaints</div>
+      </div>
+      <div style="background: rgba(220, 53, 69, 0.3); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+        <div style="font-size: 28px; font-weight: bold;"><%= stats.criticalComplaints %></div>
+        <div style="font-size: 13px; opacity: 0.9;">🔴 Critical Issues</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+        <div style="font-size: 28px; font-weight: bold;"><%= stats.sentimentStats.sentiment.negative %></div>
+        <div style="font-size: 13px; opacity: 0.9;">😞 Negative Sentiment</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.15); padding: 16px; border-radius: 8px; backdrop-filter: blur(10px);">
+        <div style="font-size: 28px; font-weight: bold;"><%= stats.sentimentStats.avg_sentiment_score %></div>
+        <div style="font-size: 13px; opacity: 0.9;">Avg Sentiment Score</div>
+      </div>
+    </div>
+    <a href="/admin/complaints" style="display: inline-block; margin-top: 16px; background: white; color: #667eea; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: transform 0.2s;">
+      View Detailed Analysis →
+    </a>
+  </div>
+  <% } %>
+
+
   <!-- Quick Actions -->
   <div class="quick-actions">
     <h3>Quick Actions</h3>
@@ -89,6 +121,22 @@
         <div>
           <h4>Schedule Inspections</h4>
           <p>Assign inspectors to restaurant inspections</p>
+        </div>
+      </a>
+
+      <a href="/admin/complaints" class="action-card">
+        <i data-lucide="message-circle" class="lucide-icon icon-box red-bg"></i>
+        <div>
+          <h4>AI Complaint Analysis</h4>
+          <p>View sentiment-analyzed complaints with urgency levels</p>
+        </div>
+      </a>
+
+      <a href="/admin/anomalies" class="action-card">
+        <i data-lucide="activity" class="lucide-icon icon-box teal-bg"></i>
+        <div>
+          <h4>Anomaly Detection ⭐</h4>
+          <p>AI-powered detection of unusual inspection patterns</p>
         </div>
       </a>
     </div>

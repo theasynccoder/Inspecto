@@ -4,6 +4,8 @@ const db = require('../config/dbConnect');
 
 const { checklistSchema, sectionLabels } = require('../data/inspectionCategories');
 const PDFService = require('../services/pdfService');
+const SentimentService = require('../services/sentimentService');
+const AnomalyService = require('../services/anomalyService');
 
 router.get('/adminLogin', (req, res) => {
   // Pass empty error variable if none exists
@@ -24,12 +26,27 @@ router.get('/admin/dashboard', async (req, res) => {
     const [inspectors] = await db.query('SELECT * FROM inspectors WHERE zone = ?', [zone]);
     const [restaurants] = await db.query('SELECT * FROM restaurants WHERE zone = ?', [zone]);
     const [reports] = await db.query('SELECT * FROM inspection_reports WHERE status="approved"');
+    
+    // Get complaints with sentiment data for the zone
+    const [complaints] = await db.query(`
+      SELECT c.*, r.zone 
+      FROM complaints c
+      JOIN restaurants r ON c.restaurant_id = r.id
+      WHERE r.zone = ?
+    `, [zone]);
+    
+    // Calculate sentiment stats
+    const sentimentService = new SentimentService();
+    const sentimentStats = sentimentService.calculateStats(complaints);
 
     const stats = {
       totalInspectors: inspectors.length,
       approvedRestaurants: restaurants.filter(r => r.status === 'approved').length,
       pendingRestaurants: restaurants.filter(r => r.status === 'pending').length,
-      totalReports: reports.length
+      totalReports: reports.length,
+      totalComplaints: complaints.length,
+      criticalComplaints: complaints.filter(c => c.urgency === 'critical').length,
+      sentimentStats
     };
 
     res.render('adminDashboard', {
@@ -731,6 +748,331 @@ router.get('/admin/restaurants/approvals',async (req, res)=>{
   res.render('restaurantsApproval',{pendingRestaurants})
 })
 
+// Complaints Management with Sentiment Analysis
+router.get('/admin/complaints', async (req, res) => {
+  if (!req.session.adminName || !req.session.zone) {
+    return res.redirect('/adminLogin');
+  }
+
+  const zone = req.session.zone;
+  const filterUrgency = req.query.urgency || 'all';
+  const filterSentiment = req.query.sentiment || 'all';
+
+  try {
+    // Get complaints for the zone
+    let query = `
+      SELECT c.*, r.name as restaurant_name, r.zone, u.name as user_name
+      FROM complaints c
+      JOIN restaurants r ON c.restaurant_id = r.id
+      LEFT JOIN users u ON c.user_id = u.email
+      WHERE r.zone = ?
+    `;
+    
+    const params = [zone];
+
+    // Add filters
+    if (filterUrgency !== 'all') {
+      query += ` AND c.urgency = ?`;
+      params.push(filterUrgency);
+    }
+    
+    if (filterSentiment !== 'all') {
+      query += ` AND c.sentiment = ?`;
+      params.push(filterSentiment);
+    }
+
+    query += ` ORDER BY 
+      CASE c.urgency 
+        WHEN 'critical' THEN 1 
+        WHEN 'high' THEN 2 
+        WHEN 'medium' THEN 3 
+        WHEN 'low' THEN 4 
+      END,
+      c.created_at DESC`;
+
+    const [complaints] = await db.query(query, params);
+
+    // Parse AI analysis JSON (handle both string and object)
+    const complaintsWithAnalysis = complaints.map(c => ({
+      ...c,
+      ai_analysis: c.ai_analysis 
+        ? (typeof c.ai_analysis === 'string' ? JSON.parse(c.ai_analysis) : c.ai_analysis) 
+        : null,
+      images: c.images 
+        ? (typeof c.images === 'string' ? JSON.parse(c.images) : c.images) 
+        : []
+    }));
+
+    // Calculate statistics
+    const sentimentService = new SentimentService();
+    const sentimentStats = sentimentService.calculateStats(complaints);
+
+    res.render('admin/complaints', {
+      complaints: complaintsWithAnalysis,
+      sentimentStats,
+      adminName: req.session.adminName,
+      zone,
+      filterUrgency,
+      filterSentiment
+    });
+
+  } catch (err) {
+    console.error('Error fetching complaints:', err);
+    res.status(500).render('error', { message: 'Failed to load complaints.' });
+  }
+});
+
+// Update complaint status
+router.post('/admin/complaints/:id/status', async (req, res) => {
+  if (!req.session.adminName || !req.session.zone) {
+    return res.redirect('/adminLogin');
+  }
+
+  const complaintId = req.params.id;
+  const { status } = req.body;
+
+  try {
+    await db.query(
+      'UPDATE complaints SET status = ?, updated_at = NOW() WHERE id = ?',
+      [status, complaintId]
+    );
+    res.redirect('/admin/complaints');
+  } catch (err) {
+    console.error('Error updating complaint status:', err);
+    res.status(500).send('Error updating complaint status');
+  }
+});
+
+// ==================== ANOMALY DETECTION ROUTES ====================
+
+// Anomaly Detection Dashboard Page
+router.get('/admin/anomalies', async (req, res) => {
+  const adminName = req.session.adminName;
+  const zone = req.session.zone;
+  
+  if (!adminName || !zone) {
+    return res.redirect('/adminLogin');
+  }
+
+  try {
+    res.render('admin/anomalies', {
+      adminName,
+      zone
+    });
+  } catch (err) {
+    console.error('Error loading anomaly detection page:', err);
+    res.status(500).render('error', { message: 'Failed to load anomaly detection page.' });
+  }
+});
+
+// API: Get Anomaly Analysis
+router.get('/admin/api/anomalies/analyze', async (req, res) => {
+  const zone = req.session.zone;
+  
+  if (!req.session.adminName || !zone) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Fetch all relevant data for the zone
+    const [reports] = await db.query(`
+      SELECT ir.*, r.name as restaurant_name, r.zone, i.name as inspector_name
+      FROM inspection_reports ir
+      JOIN restaurants r ON ir.restaurant_id = r.id
+      JOIN inspectors i ON ir.inspector_id = i.id
+      WHERE r.zone = ? AND ir.status = 'approved'
+      ORDER BY ir.submitted_at DESC
+    `, [zone]);
+
+    const [restaurants] = await db.query('SELECT * FROM restaurants WHERE zone = ?', [zone]);
+    const [inspectors] = await db.query('SELECT * FROM inspectors WHERE zone = ?', [zone]);
+
+    if (reports.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No inspection reports available for analysis',
+        data: {
+          inspector_anomalies: [],
+          restaurant_anomalies: [],
+          regional_trends: [],
+          urgent_actions: [],
+          overall_health: {
+            score: 0,
+            status: 'no_data',
+            summary: 'No inspection data available'
+          }
+        }
+      });
+    }
+
+    // Perform AI-powered anomaly detection
+    const anomalyService = new AnomalyService();
+    const analysis = await anomalyService.analyzeInspectionAnomalies(reports, restaurants, inspectors);
+
+    // Log the analysis
+    await db.query(
+      'INSERT INTO anomaly_logs (analysis_type, zone, analysis_data, anomalies_found) VALUES (?, ?, ?, ?)',
+      [
+        'comprehensive',
+        zone,
+        JSON.stringify(analysis),
+        (analysis.inspector_anomalies?.length || 0) + (analysis.restaurant_anomalies?.length || 0)
+      ]
+    );
+
+    res.json({
+      success: true,
+      data: analysis
+    });
+
+  } catch (err) {
+    console.error('Error analyzing anomalies:', err);
+    res.status(500).json({ 
+      error: 'Failed to analyze anomalies',
+      details: err.message 
+    });
+  }
+});
+
+// API: Get Inspector Behavior Analysis
+router.get('/admin/api/anomalies/inspectors', async (req, res) => {
+  const zone = req.session.zone;
+  
+  if (!req.session.adminName || !zone) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const [reports] = await db.query(`
+      SELECT ir.*, i.name as inspector_name, i.zone as inspector_zone
+      FROM inspection_reports ir
+      JOIN inspectors i ON ir.inspector_id = i.id
+      WHERE i.zone = ? AND ir.status = 'approved'
+    `, [zone]);
+
+    const [inspectors] = await db.query('SELECT * FROM inspectors WHERE zone = ?', [zone]);
+
+    const anomalyService = new AnomalyService();
+    const inspectorAnomalies = anomalyService.analyzeInspectorBehavior(reports, inspectors);
+
+    res.json({
+      success: true,
+      data: inspectorAnomalies
+    });
+
+  } catch (err) {
+    console.error('Error analyzing inspector behavior:', err);
+    res.status(500).json({ error: 'Failed to analyze inspector behavior' });
+  }
+});
+
+// API: Get Restaurant Risk Patterns
+router.get('/admin/api/anomalies/restaurants', async (req, res) => {
+  const zone = req.session.zone;
+  
+  if (!req.session.adminName || !zone) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const [reports] = await db.query(`
+      SELECT ir.*, r.name as restaurant_name, r.zone
+      FROM inspection_reports ir
+      JOIN restaurants r ON ir.restaurant_id = r.id
+      WHERE r.zone = ? AND ir.status = 'approved'
+      ORDER BY ir.submitted_at DESC
+    `, [zone]);
+
+    const [restaurants] = await db.query('SELECT * FROM restaurants WHERE zone = ?', [zone]);
+
+    const anomalyService = new AnomalyService();
+    const patterns = anomalyService.detectPatterns(reports, restaurants);
+
+    res.json({
+      success: true,
+      data: patterns
+    });
+
+  } catch (err) {
+    console.error('Error analyzing restaurant patterns:', err);
+    res.status(500).json({ error: 'Failed to analyze restaurant patterns' });
+  }
+});
+
+// API: Mark Report for Re-inspection
+router.post('/admin/api/anomalies/mark-reinspection/:reportId', async (req, res) => {
+  const zone = req.session.zone;
+  const reportId = req.params.reportId;
+  
+  if (!req.session.adminName || !zone) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    await db.query(
+      'UPDATE inspection_reports SET requires_reinspection = TRUE, anomaly_analyzed_at = NOW() WHERE id = ?',
+      [reportId]
+    );
+
+    res.json({
+      success: true,
+      message: 'Report marked for re-inspection'
+    });
+
+  } catch (err) {
+    console.error('Error marking report for re-inspection:', err);
+    res.status(500).json({ error: 'Failed to mark report' });
+  }
+});
+
+// API: Get Anomaly Statistics
+router.get('/admin/api/anomalies/stats', async (req, res) => {
+  const zone = req.session.zone;
+  
+  if (!req.session.adminName || !zone) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    // Get reports requiring re-inspection
+    const [reinspectionNeeded] = await db.query(`
+      SELECT COUNT(*) as count
+      FROM inspection_reports ir
+      JOIN restaurants r ON ir.restaurant_id = r.id
+      WHERE r.zone = ? AND ir.requires_reinspection = TRUE
+    `, [zone]);
+
+    // Get recent anomaly logs
+    const [recentAnalyses] = await db.query(`
+      SELECT * FROM anomaly_logs
+      WHERE zone = ?
+      ORDER BY analyzed_at DESC
+      LIMIT 5
+    `, [zone]);
+
+    // Get distribution of anomaly severity
+    const [severityDist] = await db.query(`
+      SELECT anomaly_severity, COUNT(*) as count
+      FROM inspection_reports ir
+      JOIN restaurants r ON ir.restaurant_id = r.id
+      WHERE r.zone = ? AND ir.anomaly_detected = TRUE
+      GROUP BY anomaly_severity
+    `, [zone]);
+
+    res.json({
+      success: true,
+      data: {
+        reinspection_needed: reinspectionNeeded[0].count,
+        recent_analyses: recentAnalyses,
+        severity_distribution: severityDist
+      }
+    });
+
+  } catch (err) {
+    console.error('Error fetching anomaly stats:', err);
+    res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
 
 
 
