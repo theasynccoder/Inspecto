@@ -198,10 +198,23 @@ router.get('/user/complaints', async (req, res) => {
     `, [userId]);
 
     // ✅ Parse the 'images' field (stored as JSON string in DB)
-    const complaints = complaintsRaw.map(c => ({
-      ...c,
-      images: c.images ? JSON.parse(c.images) : []  // safely parse
-    }));
+    const complaints = complaintsRaw.map(c => {
+      let images = [];
+      try {
+        if (c.images && typeof c.images === 'string') {
+          images = JSON.parse(c.images);
+        } else if (Array.isArray(c.images)) {
+          images = c.images;
+        }
+      } catch (err) {
+        console.error('Error parsing images for complaint:', c.id, err);
+        images = [];
+      }
+      return {
+        ...c,
+        images
+      };
+    });
 
     res.render('userViews/complaints', { complaints, restaurants });
   } catch (err) {

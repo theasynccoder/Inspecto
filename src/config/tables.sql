@@ -186,11 +186,28 @@ CREATE TABLE complaints (
   subject VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
   is_anonymous BOOLEAN DEFAULT FALSE,
+  images JSON,
   status ENUM('pending', 'in-progress', 'resolved', 'rejected') DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  sentiment VARCHAR(50),
+  sentiment_score DECIMAL(3,2),
+  urgency VARCHAR(50),
+  ai_analysis JSON,
+  analyzed_at DATETIME,
 
   FOREIGN KEY (user_id) REFERENCES users(email) ON DELETE CASCADE,
   FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS sentiment_analysis_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  complaint_id INT NOT NULL,
+  sentiment VARCHAR(50),
+  urgency VARCHAR(50),
+  confidence_score DECIMAL(3,2),
+  analysis_method VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (complaint_id) REFERENCES complaints(id) ON DELETE CASCADE
 );
 
